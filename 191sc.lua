@@ -5,9 +5,14 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Konfigurasi ukuran HP (DIPERLEBAR)
-local GUI_WIDTH = 400
-local GUI_HEIGHT = 560
+-- ========== AMBIL REMOTE EVENTS UNTUK AUTO BUY (SAMA PERSIS PATSTORE) ==========
+local remotes = ReplicatedStorage:FindFirstChild("RemoteEvents")
+local storePurchaseRE = remotes and remotes:FindFirstChild("StorePurchase")
+local rpcRE = remotes and remotes:FindFirstChild("RPC")
+
+-- Konfigurasi ukuran HP
+local GUI_WIDTH = 420
+local GUI_HEIGHT = 580
 local TAB_HEIGHT = 35
 local TITLE_HEIGHT = 45
 
@@ -267,7 +272,7 @@ local ContentCorner = Instance.new("UICorner")
 ContentCorner.Parent = Content
 ContentCorner.CornerRadius = UDim.new(0,12)
 
--- TP Tab Content (SCROLLING FRAME UNTUK BANYAK LOKASI)
+-- TP Tab Content (SCROLLING FRAME)
 local TPContent = Instance.new("ScrollingFrame")
 TPContent.Parent = Content
 TPContent.Size = UDim2.new(1,0,1,0)
@@ -292,7 +297,7 @@ AutoBuyContent.Size = UDim2.new(1,0,1,0)
 AutoBuyContent.BackgroundTransparency = 1
 AutoBuyContent.Visible = false
 AutoBuyContent.ScrollBarThickness = 4
-AutoBuyContent.CanvasSize = UDim2.new(0,0,0,300)
+AutoBuyContent.CanvasSize = UDim2.new(0,0,0,350)
 
 -- MS SAFETY TAB CONTENT
 local MSSafetyContent = Instance.new("ScrollingFrame")
@@ -312,7 +317,7 @@ AutoSellContent.Visible = false
 AutoSellContent.ScrollBarThickness = 4
 AutoSellContent.CanvasSize = UDim2.new(0,0,0,220)
 
--- ========== SEMUA LOKASI TELEPORT (DARI PATSTORE) ==========
+-- ========== SEMUA LOKASI TELEPORT (SAMA PERSIS PATSTORE) ==========
 local LOCATIONS = {
     {name = "🏪 Dealer NPC",      pos = Vector3.new(770.992, 3.71, 433.75), desc = "Dealer Mobil"},
     {name = "🍬 NPC Marshmallow", pos = Vector3.new(510.061, 4.476, 600.548), desc = "Tempat Jual/Beli MS"},
@@ -387,7 +392,7 @@ for i, loc in ipairs(LOCATIONS) do
     tpButtons[i] = btn
 end
 
--- MS LOOP CONTENT (sama seperti original)
+-- ========== MS LOOP CONTENT ==========
 local MSLoopTitle = Instance.new("TextLabel")
 MSLoopTitle.Parent = MSLoopContent
 MSLoopTitle.Size = UDim2.new(1,-16,0,25)
@@ -550,24 +555,24 @@ local RefreshBtnCorner = Instance.new("UICorner")
 RefreshBtnCorner.Parent = RefreshBtn
 RefreshBtnCorner.CornerRadius = UDim.new(0,6)
 
--- ========== AUTO BUY UI (FIXED) ==========
+-- ========== AUTO BUY UI (SAMA PERSIS PATSTORE - PAKAI FIRESERVER) ==========
 local AutoBuyTitle = Instance.new("TextLabel")
 AutoBuyTitle.Parent = AutoBuyContent
 AutoBuyTitle.Size = UDim2.new(1,-16,0,28)
 AutoBuyTitle.Position = UDim2.new(0,8,0,5)
 AutoBuyTitle.BackgroundTransparency = 1
-AutoBuyTitle.Text = "🛒 AUTO BUY BAHAN"
+AutoBuyTitle.Text = "🛒 AUTO BUY BAHAN (RemoteEvent)"
 AutoBuyTitle.TextColor3 = Color3.fromRGB(100,200,255)
 AutoBuyTitle.TextXAlignment = Enum.TextXAlignment.Left
 AutoBuyTitle.Font = Enum.Font.GothamBold
-AutoBuyTitle.TextSize = 14
+AutoBuyTitle.TextSize = 13
 
 local AutoBuyDesc = Instance.new("TextLabel")
 AutoBuyDesc.Parent = AutoBuyContent
-AutoBuyDesc.Size = UDim2.new(1,-16,0,20)
+AutoBuyDesc.Size = UDim2.new(1,-16,0,32)
 AutoBuyDesc.Position = UDim2.new(0,8,0,35)
 AutoBuyDesc.BackgroundTransparency = 1
-AutoBuyDesc.Text = "Beli bahan (Water, Sugar, Gelatin) dari NPC"
+AutoBuyDesc.Text = "Beli bahan (Water, Sugar, Gelatin) dari NPC\nMenggunakan StorePurchase RemoteEvent (sama seperti PatStore)"
 AutoBuyDesc.TextColor3 = Color3.fromRGB(200,200,200)
 AutoBuyDesc.TextXAlignment = Enum.TextXAlignment.Left
 AutoBuyDesc.Font = Enum.Font.Gotham
@@ -577,7 +582,7 @@ AutoBuyDesc.TextSize = 10
 local JumlahBeliFrame = Instance.new("Frame")
 JumlahBeliFrame.Parent = AutoBuyContent
 JumlahBeliFrame.Size = UDim2.new(1,-16,0,70)
-JumlahBeliFrame.Position = UDim2.new(0,8,0,60)
+JumlahBeliFrame.Position = UDim2.new(0,8,0,75)
 JumlahBeliFrame.BackgroundColor3 = Color3.fromRGB(35,35,45)
 JumlahBeliFrame.BorderSizePixel = 0
 local JumlahBeliCorner = Instance.new("UICorner")
@@ -595,7 +600,7 @@ JumlahBeliTitle.TextXAlignment = Enum.TextXAlignment.Left
 JumlahBeliTitle.Font = Enum.Font.GothamBold
 JumlahBeliTitle.TextSize = 11
 
--- Slider untuk jumlah beli
+-- Slider
 local JumlahSliderBg = Instance.new("Frame")
 JumlahSliderBg.Parent = JumlahBeliFrame
 JumlahSliderBg.Size = UDim2.new(0.8,0,0,8)
@@ -629,8 +634,8 @@ JumlahValueLabel.TextSize = 12
 -- Status Box
 local BuyStatusFrame = Instance.new("Frame")
 BuyStatusFrame.Parent = AutoBuyContent
-BuyStatusFrame.Size = UDim2.new(1,-16,0,55)
-BuyStatusFrame.Position = UDim2.new(0,8,0,140)
+BuyStatusFrame.Size = UDim2.new(1,-16,0,70)
+BuyStatusFrame.Position = UDim2.new(0,8,0,155)
 BuyStatusFrame.BackgroundColor3 = Color3.fromRGB(35,35,45)
 BuyStatusFrame.BorderSizePixel = 0
 local BuyStatusCorner = Instance.new("UICorner")
@@ -639,15 +644,15 @@ BuyStatusCorner.CornerRadius = UDim.new(0,8)
 
 local BuyStatusIcon = Instance.new("TextLabel")
 BuyStatusIcon.Parent = BuyStatusFrame
-BuyStatusIcon.Size = UDim2.new(0,40,1,0)
+BuyStatusIcon.Size = UDim2.new(0,45,1,0)
 BuyStatusIcon.Position = UDim2.new(0,8,0,0)
 BuyStatusIcon.BackgroundTransparency = 1
 BuyStatusIcon.Text = "🛒"
-BuyStatusIcon.TextSize = 28
+BuyStatusIcon.TextSize = 32
 
 local BuyStatusLabel = Instance.new("TextLabel")
 BuyStatusLabel.Parent = BuyStatusFrame
-BuyStatusLabel.Size = UDim2.new(1,-60,0,18)
+BuyStatusLabel.Size = UDim2.new(1,-65,0,18)
 BuyStatusLabel.Position = UDim2.new(0,55,0,8)
 BuyStatusLabel.BackgroundTransparency = 1
 BuyStatusLabel.Text = "STATUS"
@@ -658,20 +663,31 @@ BuyStatusLabel.TextSize = 11
 
 local BuyStatusValue = Instance.new("TextLabel")
 BuyStatusValue.Parent = BuyStatusFrame
-BuyStatusValue.Size = UDim2.new(1,-60,0,28)
+BuyStatusValue.Size = UDim2.new(1,-65,0,32)
 BuyStatusValue.Position = UDim2.new(0,55,0,28)
 BuyStatusValue.BackgroundTransparency = 1
 BuyStatusValue.Text = "⏹️ BELUM MULAI"
 BuyStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
 BuyStatusValue.TextXAlignment = Enum.TextXAlignment.Left
 BuyStatusValue.Font = Enum.Font.GothamBold
-BuyStatusValue.TextSize = 12
+BuyStatusValue.TextSize = 11
+
+local BuyTotalLabel = Instance.new("TextLabel")
+BuyTotalLabel.Parent = BuyStatusFrame
+BuyTotalLabel.Size = UDim2.new(1,-65,0,18)
+BuyTotalLabel.Position = UDim2.new(0,55,0,52)
+BuyTotalLabel.BackgroundTransparency = 1
+BuyTotalLabel.Text = "Total: 0 item"
+BuyTotalLabel.TextColor3 = Color3.fromRGB(100,200,255)
+BuyTotalLabel.TextXAlignment = Enum.TextXAlignment.Left
+BuyTotalLabel.Font = Enum.Font.Gotham
+BuyTotalLabel.TextSize = 10
 
 -- Buttons
 local BuyStartBtn = Instance.new("TextButton")
 BuyStartBtn.Parent = AutoBuyContent
 BuyStartBtn.Size = UDim2.new(0.5,-8,0,38)
-BuyStartBtn.Position = UDim2.new(0,8,0,205)
+BuyStartBtn.Position = UDim2.new(0,8,0,235)
 BuyStartBtn.BackgroundColor3 = Color3.fromRGB(50,150,50)
 BuyStartBtn.Text = "▶️ START BUY"
 BuyStartBtn.TextColor3 = Color3.fromRGB(255,255,255)
@@ -684,7 +700,7 @@ BuyStartCorner.CornerRadius = UDim.new(0,6)
 local BuyStopBtn = Instance.new("TextButton")
 BuyStopBtn.Parent = AutoBuyContent
 BuyStopBtn.Size = UDim2.new(0.5,-8,0,38)
-BuyStopBtn.Position = UDim2.new(0.5,4,0,205)
+BuyStopBtn.Position = UDim2.new(0.5,4,0,235)
 BuyStopBtn.BackgroundColor3 = Color3.fromRGB(150,50,50)
 BuyStopBtn.Text = "⏹️ STOP"
 BuyStopBtn.TextColor3 = Color3.fromRGB(255,255,255)
@@ -705,14 +721,6 @@ MSSafetyTitle.TextColor3 = Color3.fromRGB(100,200,255)
 MSSafetyTitle.TextXAlignment = Enum.TextXAlignment.Left
 MSSafetyTitle.Font = Enum.Font.GothamBold
 MSSafetyTitle.TextSize = 14
-
--- Blink buttons
-local blinkButtons = {
-    {name = "⬆️ BLINK ATAS", desc = "Naik 2 studs", color = Color3.fromRGB(150,100,200), func = nil, yPos = 40},
-    {name = "⬇️ BLINK BAWAH", desc = "Turun 4 studs", color = Color3.fromRGB(0,150,200), func = nil, yPos = 105},
-    {name = "➡️ BLINK MAJU", desc = "Maju 5 studs", color = Color3.fromRGB(0,200,100), func = nil, yPos = 170},
-    {name = "⬅️ BLINK MUNDUR", desc = "Mundur 5 studs", color = Color3.fromRGB(200,100,0), func = nil, yPos = 235},
-}
 
 local BlinkStatus = Instance.new("TextLabel")
 BlinkStatus.Parent = MSSafetyContent
@@ -1011,7 +1019,6 @@ local function startMSLoop()
         while loopRunning do
             updateBuyIndicators()
             
-            -- Step 1: Water
             local waterTool = findTool("water")
             if waterTool and equipTool(waterTool) then
                 ToolStatus.Text = "Tool: WATER"
@@ -1031,7 +1038,6 @@ local function startMSLoop()
             task.wait(3)
             if not loopRunning then break end
             
-            -- Step 2: Sugar
             local sugarTool = findTool("sugar")
             if sugarTool and equipTool(sugarTool) then
                 ToolStatus.Text = "Tool: SUGAR"
@@ -1051,7 +1057,6 @@ local function startMSLoop()
             task.wait(0.5)
             if not loopRunning then break end
             
-            -- Step 3: Gelatin
             local gelatinTool = findTool("gelatin")
             if gelatinTool and equipTool(gelatinTool) then
                 ToolStatus.Text = "Tool: GELATIN"
@@ -1071,7 +1076,6 @@ local function startMSLoop()
             task.wait(3)
             if not loopRunning then break end
             
-            -- Step 4: Empty Bag (ambil hasil)
             local emptyTool = findTool("empty") or findTool("bag")
             if emptyTool and equipTool(emptyTool) then
                 ToolStatus.Text = "Tool: EMPTY BAG"
@@ -1103,9 +1107,10 @@ local function startMSLoop()
     end)
 end
 
--- ========== AUTO BUY FUNCTIONS (FIXED - langsung tekan E di NPC) ==========
+-- ========== AUTO BUY FUNCTIONS (SAMA PERSIS PATSTORE - FIRESERVER) ==========
 local autoBuyRunning = false
 local currentBuyAmount = 10
+local autoBuyTotalBought = 0
 
 local function setBuyAmount(amount)
     currentBuyAmount = math.clamp(amount, 1, 50)
@@ -1115,48 +1120,49 @@ end
 
 local function startAutoBuy()
     if autoBuyRunning then return end
+    if not storePurchaseRE then
+        BuyStatusValue.Text = "❌ RemoteEvent tidak ditemukan!"
+        BuyStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
+        task.wait(2)
+        BuyStatusValue.Text = "⏹️ BELUM MULAI"
+        BuyStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
+        return
+    end
+    
     autoBuyRunning = true
+    autoBuyTotalBought = 0
     BuyStatusValue.Text = "▶️ RUNNING"
     BuyStatusValue.TextColor3 = Color3.fromRGB(100,255,100)
+    BuyTotalLabel.Text = "Total: 0 item"
+    
+    local BUY_ITEMS = {
+        {name = "Water", display = "💧 Water"},
+        {name = "Sugar Block Bag", display = "🍚 Sugar Block Bag"},
+        {name = "Gelatin", display = "🧪 Gelatin"}
+    }
     
     task.spawn(function()
         local amount = currentBuyAmount
-        BuyStatusValue.Text = "Membeli " .. amount .. "x WATER..."
         
-        -- Beli Water
-        for i = 1, amount do
+        for _, item in ipairs(BUY_ITEMS) do
             if not autoBuyRunning then break end
-            BuyStatusValue.Text = "💧 Water " .. i .. "/" .. amount
-            pressE()
-            task.wait(0.3)
-        end
-        
-        if not autoBuyRunning then return end
-        task.wait(0.5)
-        BuyStatusValue.Text = "Membeli " .. amount .. "x SUGAR..."
-        
-        -- Beli Sugar
-        for i = 1, amount do
-            if not autoBuyRunning then break end
-            BuyStatusValue.Text = "🍚 Sugar " .. i .. "/" .. amount
-            pressE()
-            task.wait(0.3)
-        end
-        
-        if not autoBuyRunning then return end
-        task.wait(0.5)
-        BuyStatusValue.Text = "Membeli " .. amount .. "x GELATIN..."
-        
-        -- Beli Gelatin
-        for i = 1, amount do
-            if not autoBuyRunning then break end
-            BuyStatusValue.Text = "🧪 Gelatin " .. i .. "/" .. amount
-            pressE()
+            BuyStatusValue.Text = "🛒 Membeli " .. item.display .. " x" .. amount
+            BuyStatusValue.TextColor3 = Color3.fromRGB(255,255,100)
+            
+            for i = 1, amount do
+                if not autoBuyRunning then break end
+                pcall(function()
+                    storePurchaseRE:FireServer(item.name, 1)
+                end)
+                autoBuyTotalBought = autoBuyTotalBought + 1
+                BuyTotalLabel.Text = "Total: " .. autoBuyTotalBought .. " item"
+                task.wait(0.25)
+            end
             task.wait(0.3)
         end
         
         if autoBuyRunning then
-            BuyStatusValue.Text = "✅ Selesai! " .. (amount * 3) .. " item dibeli"
+            BuyStatusValue.Text = "✅ Selesai! Total: " .. autoBuyTotalBought .. " item"
             BuyStatusValue.TextColor3 = Color3.fromRGB(100,255,100)
             task.wait(2)
             if autoBuyRunning then
@@ -1175,7 +1181,7 @@ local function stopAutoBuy()
     BuyStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
 end
 
--- ========== SMOOTH TP FUNCTION ==========
+-- ========== SMOOTH TP FUNCTION (SAMA PERSIS PATSTORE) ==========
 function smoothTeleport(targetCFrame, duration)
     local character = player.Character
     if not character then return end
@@ -1339,33 +1345,7 @@ local function blinkMundur()
     end
 end
 
--- ========== CONNECT BUTTONS ==========
-CloseBtn.MouseButton1Click:Connect(function()
-    if autoSellRunning then stopAutoSell() end
-    if loopRunning then loopRunning = false end
-    if autoBuyRunning then stopAutoBuy() end
-    ScreenGui:Destroy()
-end)
-
--- TP Buttons
-for i, loc in ipairs(LOCATIONS) do
-    tpButtons[i].MouseButton1Click:Connect(function()
-        smoothTeleport(CFrame.new(loc.pos), 10)
-    end)
-end
-
--- MS Loop Buttons
-MSLoopStartBtn.MouseButton1Click:Connect(function()
-    if not loopRunning then task.spawn(startMSLoop) end
-end)
-MSLoopStopBtn.MouseButton1Click:Connect(function() loopRunning = false end)
-RefreshBtn.MouseButton1Click:Connect(updateBuyIndicators)
-
--- Auto Buy Buttons
-BuyStartBtn.MouseButton1Click:Connect(startAutoBuy)
-BuyStopBtn.MouseButton1Click:Connect(stopAutoBuy)
-
--- Blink Buttons (buat tombol di MS Safety)
+-- ========== CREATE BLINK BUTTONS ==========
 local function createBlinkButton(parent, name, desc, color, yPos, callback)
     local btn = Instance.new("TextButton")
     btn.Parent = parent
@@ -1429,6 +1409,32 @@ createBlinkButton(MSSafetyContent, "⬆️ BLINK ATAS", "Naik 2 studs", Color3.f
 createBlinkButton(MSSafetyContent, "⬇️ BLINK BAWAH", "Turun 4 studs", Color3.fromRGB(0,150,200), 100, blinkDown)
 createBlinkButton(MSSafetyContent, "➡️ BLINK MAJU", "Maju 5 studs", Color3.fromRGB(0,200,100), 160, blinkMaju)
 createBlinkButton(MSSafetyContent, "⬅️ BLINK MUNDUR", "Mundur 5 studs", Color3.fromRGB(200,100,0), 220, blinkMundur)
+
+-- ========== CONNECT BUTTONS ==========
+CloseBtn.MouseButton1Click:Connect(function()
+    if autoSellRunning then stopAutoSell() end
+    if loopRunning then loopRunning = false end
+    if autoBuyRunning then stopAutoBuy() end
+    ScreenGui:Destroy()
+end)
+
+-- TP Buttons
+for i, loc in ipairs(LOCATIONS) do
+    tpButtons[i].MouseButton1Click:Connect(function()
+        smoothTeleport(CFrame.new(loc.pos), 10)
+    end)
+end
+
+-- MS Loop Buttons
+MSLoopStartBtn.MouseButton1Click:Connect(function()
+    if not loopRunning then task.spawn(startMSLoop) end
+end)
+MSLoopStopBtn.MouseButton1Click:Connect(function() loopRunning = false end)
+RefreshBtn.MouseButton1Click:Connect(updateBuyIndicators)
+
+-- Auto Buy Buttons (PAKAI FIRESERVER)
+BuyStartBtn.MouseButton1Click:Connect(startAutoBuy)
+BuyStopBtn.MouseButton1Click:Connect(stopAutoBuy)
 
 -- Auto Sell Buttons
 AutoSellStartBtn.MouseButton1Click:Connect(startAutoSell)
@@ -1539,7 +1545,7 @@ AutoSellTabBtn.MouseButton1Click:Connect(function()
     AutoSellInfo.Text = "Tools: " .. #getSellTools()
 end)
 
--- Slider
+-- Slider untuk Auto Buy
 JumlahSliderBg.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         local mousePos = input.Position.X

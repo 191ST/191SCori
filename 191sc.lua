@@ -332,7 +332,7 @@ local LOCATIONS = {
     {name = "⚒️ Material Storage", pos = Vector3.new(521.32, 47.79, 617.25), desc = "Tempat Bahan"},
 }
 
--- ========== SMOOTH TELEPORT FUNCTION (SAMA PERSIS PATSTORE) ==========
+-- ========== SMOOTH TELEPORT FUNCTION (COPY PASTE 100% DARI PATSTORE) ==========
 function smoothTeleport(targetCFrame, duration)
     local character = player.Character
     if not character then
@@ -1274,7 +1274,7 @@ local function startMSLoop()
     end)
 end
 
--- ========== AUTO BUY FUNCTIONS (SAMA PERSIS PATSTORE - FIRESERVER) ==========
+-- ========== AUTO BUY FUNCTIONS (SAMA PERSIS PATSTORE) ==========
 local autoBuyRunning = false
 local currentBuyAmount = 10
 local autoBuyTotalBought = 0

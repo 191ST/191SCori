@@ -1166,6 +1166,47 @@ local function stopAutoBuy()
     BuyStatusValue.TextColor3 = Color3.fromRGB(255,100,100)
 end
 
+-- ========== SLIDER AUTO BUY (FIX - TIDAK IKUT MOUSE DI LUAR) ==========
+local isDraggingSlider = false
+
+-- Mouse down di slider
+JumlahSliderBg.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        isDraggingSlider = true
+        local mousePos = input.Position.X
+        local sliderPos = JumlahSliderBg.AbsolutePosition.X
+        local sliderWidth = JumlahSliderBg.AbsoluteSize.X
+        local percent = math.clamp((mousePos - sliderPos) / sliderWidth, 0, 1)
+        local newAmount = math.floor(1 + percent * 49)
+        setBuyAmount(newAmount)
+    end
+end)
+
+-- Mouse move saat drag
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement and isDraggingSlider then
+        local mousePos = input.Position.X
+        local sliderPos = JumlahSliderBg.AbsolutePosition.X
+        local sliderWidth = JumlahSliderBg.AbsoluteSize.X
+        
+        -- Hanya update jika mouse masih di dalam area slider
+        local mouseInSlider = (mousePos >= sliderPos and mousePos <= sliderPos + sliderWidth)
+        
+        if mouseInSlider then
+            local percent = math.clamp((mousePos - sliderPos) / sliderWidth, 0, 1)
+            local newAmount = math.floor(1 + percent * 49)
+            setBuyAmount(newAmount)
+        end
+    end
+end)
+
+-- Mouse up (berhenti drag)
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        isDraggingSlider = false
+    end
+end)
+
 -- ========== BLINK FUNCTIONS ==========
 local function blinkAtas()
     local char = player.Character
@@ -1410,29 +1451,6 @@ AutoSellTabBtn.MouseButton1Click:Connect(function()
     AutoSellTabBtn.TextColor3 = Color3.fromRGB(255,255,255)
     
     AutoSellInfo.Text = "Tools: " .. #getSellTools()
-end)
-
--- Slider untuk Auto Buy
-JumlahSliderBg.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        local mousePos = input.Position.X
-        local sliderPos = JumlahSliderBg.AbsolutePosition.X
-        local sliderWidth = JumlahSliderBg.AbsoluteSize.X
-        local percent = math.clamp((mousePos - sliderPos) / sliderWidth, 0, 1)
-        local newAmount = math.floor(1 + percent * 49)
-        setBuyAmount(newAmount)
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-        local mousePos = input.Position.X
-        local sliderPos = JumlahSliderBg.AbsolutePosition.X
-        local sliderWidth = JumlahSliderBg.AbsoluteSize.X
-        local percent = math.clamp((mousePos - sliderPos) / sliderWidth, 0, 1)
-        local newAmount = math.floor(1 + percent * 49)
-        setBuyAmount(newAmount)
-    end
 end)
 
 -- Minimize

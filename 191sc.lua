@@ -1092,7 +1092,7 @@ local function startMSLoop()
     end)
 end
 
--- ========== AUTO BUY FUNCTIONS ==========
+-- ========== AUTO BUY FUNCTIONS (FIX - PAKAI DELAY YANG BENAR) ==========
 local autoBuyRunning = false
 local currentBuyAmount = 10
 local autoBuyTotalBought = 0
@@ -1131,19 +1131,27 @@ local function startAutoBuy()
         
         for _, item in ipairs(BUY_ITEMS) do
             if not autoBuyRunning then break end
+            
             BuyStatusValue.Text = "🛒 Membeli " .. item.display .. " x" .. amount
             BuyStatusValue.TextColor3 = Color3.fromRGB(255,255,100)
             
+            -- Beli satu per satu dengan delay yang cukup
             for i = 1, amount do
                 if not autoBuyRunning then break end
+                
                 pcall(function()
                     storePurchaseRE:FireServer(item.name, 1)
                 end)
+                
                 autoBuyTotalBought = autoBuyTotalBought + 1
                 BuyTotalLabel.Text = "Total: " .. autoBuyTotalBought .. " item"
-                task.wait(0.25)
+                
+                -- DELAY YANG LEBIH LAMA (0.5 detik) AGAR TIDAK DIANGGAP SPAM
+                task.wait(0.5)
             end
-            task.wait(0.3)
+            
+            -- Jeda antar item berbeda
+            task.wait(0.8)
         end
         
         if autoBuyRunning then

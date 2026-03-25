@@ -5,9 +5,10 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- ========== AMBIL REMOTE EVENTS UNTUK AUTO BUY ==========
+-- ========== AMBIL REMOTE EVENTS (SAMA PERSIS PATSTORE) ==========
 local remotes = ReplicatedStorage:FindFirstChild("RemoteEvents")
 local storePurchaseRE = remotes and remotes:FindFirstChild("StorePurchase")
+local rpcRE = remotes and remotes:FindFirstChild("RPC")
 
 -- Konfigurasi ukuran HP
 local GUI_WIDTH = 420
@@ -21,6 +22,84 @@ ScreenGui.Parent = player:WaitForChild("PlayerGui")
 ScreenGui.Name = "TP_Hub_191"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
+
+-- Loading Screen (SAMA PERSIS PATSTORE)
+local LoadingFrame = Instance.new("Frame")
+LoadingFrame.Parent = ScreenGui
+LoadingFrame.Size = UDim2.new(1,0,1,0)
+LoadingFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+LoadingFrame.BackgroundTransparency = 0.5
+LoadingFrame.Visible = false
+LoadingFrame.ZIndex = 10
+
+local LoadingMain = Instance.new("Frame")
+LoadingMain.Parent = LoadingFrame
+LoadingMain.Size = UDim2.new(0,280,0,150)
+LoadingMain.Position = UDim2.new(0.5,-140,0.5,-75)
+LoadingMain.BackgroundColor3 = Color3.fromRGB(25,25,35)
+LoadingMain.BackgroundTransparency = 0.1
+LoadingMain.BorderSizePixel = 0
+LoadingMain.ZIndex = 11
+
+local LoadingMainCorner = Instance.new("UICorner")
+LoadingMainCorner.Parent = LoadingMain
+LoadingMainCorner.CornerRadius = UDim.new(0,15)
+
+local LoadingTitle = Instance.new("TextLabel")
+LoadingTitle.Parent = LoadingMain
+LoadingTitle.Size = UDim2.new(1,0,0,40)
+LoadingTitle.Position = UDim2.new(0,0,0,10)
+LoadingTitle.BackgroundTransparency = 1
+LoadingTitle.Text = "191"
+LoadingTitle.TextColor3 = Color3.fromRGB(100,200,255)
+LoadingTitle.Font = Enum.Font.GothamBold
+LoadingTitle.TextSize = 28
+LoadingTitle.ZIndex = 12
+
+local LoadingBarBg = Instance.new("Frame")
+LoadingBarBg.Parent = LoadingMain
+LoadingBarBg.Size = UDim2.new(0.8,0,0,12)
+LoadingBarBg.Position = UDim2.new(0.1,0,0,65)
+LoadingBarBg.BackgroundColor3 = Color3.fromRGB(40,40,50)
+LoadingBarBg.BorderSizePixel = 0
+LoadingBarBg.ZIndex = 12
+
+local LoadingBarBgCorner = Instance.new("UICorner")
+LoadingBarBgCorner.Parent = LoadingBarBg
+LoadingBarBgCorner.CornerRadius = UDim.new(0,6)
+
+local LoadingBar = Instance.new("Frame")
+LoadingBar.Parent = LoadingBarBg
+LoadingBar.Size = UDim2.new(0,0,1,0)
+LoadingBar.BackgroundColor3 = Color3.fromRGB(0,200,255)
+LoadingBar.BorderSizePixel = 0
+LoadingBar.ZIndex = 13
+
+local LoadingBarCorner = Instance.new("UICorner")
+LoadingBarCorner.Parent = LoadingBar
+LoadingBarCorner.CornerRadius = UDim.new(0,6)
+
+local LoadingPercent = Instance.new("TextLabel")
+LoadingPercent.Parent = LoadingMain
+LoadingPercent.Size = UDim2.new(1,0,0,25)
+LoadingPercent.Position = UDim2.new(0,0,0,85)
+LoadingPercent.BackgroundTransparency = 1
+LoadingPercent.Text = "0%"
+LoadingPercent.TextColor3 = Color3.fromRGB(255,255,255)
+LoadingPercent.Font = Enum.Font.GothamBold
+LoadingPercent.TextSize = 16
+LoadingPercent.ZIndex = 12
+
+local LoadingStatus = Instance.new("TextLabel")
+LoadingStatus.Parent = LoadingMain
+LoadingStatus.Size = UDim2.new(1,0,0,25)
+LoadingStatus.Position = UDim2.new(0,0,0,110)
+LoadingStatus.BackgroundTransparency = 1
+LoadingStatus.Text = "MEMPERSIAPKAN..."
+LoadingStatus.TextColor3 = Color3.fromRGB(200,200,200)
+LoadingStatus.Font = Enum.Font.Gotham
+LoadingStatus.TextSize = 11
+LoadingStatus.ZIndex = 12
 
 -- Main Frame
 local Frame = Instance.new("Frame")
@@ -75,6 +154,7 @@ BillboardText.TextColor3 = Color3.fromRGB(100,200,255)
 BillboardText.TextXAlignment = Enum.TextXAlignment.Left
 BillboardText.Font = Enum.Font.Gotham
 BillboardText.TextSize = 9
+BillboardText.TextWrapped = true
 
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = TitleBar
@@ -192,7 +272,7 @@ local ContentCorner = Instance.new("UICorner")
 ContentCorner.Parent = Content
 ContentCorner.CornerRadius = UDim.new(0,12)
 
--- TP Tab Content (Scrolling)
+-- TP Tab Content
 local TPContent = Instance.new("ScrollingFrame")
 TPContent.Parent = Content
 TPContent.Size = UDim2.new(1,0,1,0)
@@ -252,39 +332,168 @@ local LOCATIONS = {
     {name = "⚒️ Material Storage", pos = Vector3.new(521.32, 47.79, 617.25), desc = "Tempat Bahan"},
 }
 
--- ========== TP FLICK (LANGSUNG PINDAH, SEPERTI PATSTORE) ==========
-local function teleportFlick(targetPos)
-    local char = player.Character
-    if not char then return end
+-- ========== SMOOTH TELEPORT FUNCTION (SAMA PERSIS PATSTORE) ==========
+function smoothTeleport(targetCFrame, duration)
+    local character = player.Character
+    if not character then
+        warn("Character not found!")
+        return
+    end
     
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then
+        warn("HumanoidRootPart not found!")
+        return
+    end
     
-    -- Lock wheels biar ga oleng (sama kayak PatStore)
-    for _, child in pairs(char:GetDescendants()) do
-        if child:IsA("BasePart") then
-            if string.find(string.lower(child.Name), "wheel") or 
-               string.find(string.lower(child.Name), "roda") or
-               string.find(string.lower(child.Name), "ban") then
-                child.Anchored = true
+    local function lockAllWheels()
+        local vehicle = character:FindFirstChildOfClass("VehicleSeat")
+        if vehicle and vehicle:FindFirstChild("Wheels") then
+            for _, wheel in pairs(vehicle.Wheels:GetChildren()) do
+                if wheel:IsA("Part") or wheel:IsA("MeshPart") then
+                    wheel.Anchored = true
+                end
+            end
+        end
+        
+        for _, child in pairs(character:GetDescendants()) do
+            if child:IsA("Part") or child:IsA("MeshPart") or child:IsA("CylinderPart") or child:IsA("WedgePart") then
+                if string.find(string.lower(child.Name), "wheel") or 
+                   string.find(string.lower(child.Name), "roda") or
+                   string.find(string.lower(child.Name), "ban") or
+                   string.find(string.lower(child.Name), "tire") then
+                    child.Anchored = true
+                    child.CanCollide = false
+                end
             end
         end
     end
     
-    -- Pindah langsung
-    hrp.CFrame = CFrame.new(targetPos)
-    
-    -- Unlock wheels
-    task.wait(0.1)
-    for _, child in pairs(char:GetDescendants()) do
-        if child:IsA("BasePart") then
-            if string.find(string.lower(child.Name), "wheel") or 
-               string.find(string.lower(child.Name), "roda") or
-               string.find(string.lower(child.Name), "ban") then
-                child.Anchored = false
+    local function unlockAllWheels()
+        local vehicle = character:FindFirstChildOfClass("VehicleSeat")
+        if vehicle and vehicle:FindFirstChild("Wheels") then
+            for _, wheel in pairs(vehicle.Wheels:GetChildren()) do
+                if wheel:IsA("Part") or wheel:IsA("MeshPart") then
+                    wheel.Anchored = false
+                end
+            end
+        end
+        
+        for _, child in pairs(character:GetDescendants()) do
+            if child:IsA("Part") or child:IsA("MeshPart") or child:IsA("CylinderPart") or child:IsA("WedgePart") then
+                if string.find(string.lower(child.Name), "wheel") or 
+                   string.find(string.lower(child.Name), "roda") or
+                   string.find(string.lower(child.Name), "ban") or
+                   string.find(string.lower(child.Name), "tire") then
+                    child.Anchored = false
+                end
             end
         end
     end
+    
+    local bp = Instance.new("BodyPosition")
+    bp.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+    bp.P = 1e5
+    bp.D = 1e3
+    bp.Parent = hrp
+    
+    local bg = Instance.new("BodyGyro")
+    bg.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+    bg.P = 1e5
+    bg.D = 1e3
+    bg.Parent = hrp
+    
+    lockAllWheels()
+    
+    for _, child in pairs(character:GetDescendants()) do
+        if child:IsA("BasePart") then
+            child.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0)
+        end
+    end
+    
+    LoadingFrame.Visible = true
+    LoadingBar.Size = UDim2.new(0,0,1,0)
+    LoadingPercent.Text = "0%"
+    
+    local startCF = hrp.CFrame
+    local riseHeight = 65
+    local upCF = startCF + Vector3.new(0, riseHeight, 0)
+    local horizontalCF = CFrame.new(targetCFrame.X, upCF.Y, targetCFrame.Z) * CFrame.Angles(0, targetCFrame.Rotation.Y, 0)
+    
+    local totalSteps = 300
+    local riseSteps = math.floor(totalSteps * 0.3)
+    local travelSteps = math.floor(totalSteps * 0.4)
+    local descendSteps = totalSteps - riseSteps - travelSteps
+    local stepTime = duration / totalSteps
+    
+    LoadingStatus.Text = "FASE 1: NAIK 65 STUDS KE ATAS..."
+    
+    for i = 1, riseSteps do
+        if not hrp or not hrp.Parent then break end
+        local alpha = i / riseSteps
+        local currentCF = startCF:Lerp(upCF, alpha)
+        bp.Position = currentCF.Position
+        bg.CFrame = currentCF
+        local percent = math.floor((i / totalSteps) * 100)
+        LoadingBar.Size = UDim2.new(percent/100,0,1,0)
+        LoadingPercent.Text = percent .. "%"
+        LoadingStatus.Text = string.format("NAIK: %d/65 studs", math.floor(alpha * 65))
+        task.wait(stepTime)
+    end
+    
+    LoadingStatus.Text = "FASE 2: BERGERAK HORIZONTAL..."
+    
+    for i = 1, travelSteps do
+        if not hrp or not hrp.Parent then break end
+        local alpha = i / travelSteps
+        local currentCF = upCF:Lerp(horizontalCF, alpha)
+        bp.Position = currentCF.Position
+        bg.CFrame = currentCF
+        local stepIndex = riseSteps + i
+        local percent = math.floor((stepIndex / totalSteps) * 100)
+        LoadingBar.Size = UDim2.new(percent/100,0,1,0)
+        LoadingPercent.Text = percent .. "%"
+        local distance = (currentCF.Position - upCF.Position).Magnitude
+        local totalDistance = (horizontalCF.Position - upCF.Position).Magnitude
+        LoadingStatus.Text = string.format("JALAN: %.1f/%.1f studs", distance, totalDistance)
+        task.wait(stepTime)
+    end
+    
+    LoadingStatus.Text = "FASE 3: TURUN DARI 65 STUDS KE WAYPOINT..."
+    
+    for i = 1, descendSteps do
+        if not hrp or not hrp.Parent then break end
+        local alpha = i / descendSteps
+        local currentCF = horizontalCF:Lerp(targetCFrame, alpha)
+        bp.Position = currentCF.Position
+        bg.CFrame = currentCF
+        local stepIndex = riseSteps + travelSteps + i
+        local percent = math.floor((stepIndex / totalSteps) * 100)
+        LoadingBar.Size = UDim2.new(percent/100,0,1,0)
+        LoadingPercent.Text = percent .. "%"
+        LoadingStatus.Text = string.format("TURUN: %d/65 studs", math.floor((1 - alpha) * 65))
+        task.wait(stepTime)
+    end
+    
+    bp.Position = targetCFrame.Position
+    bg.CFrame = targetCFrame
+    
+    LoadingBar.Size = UDim2.new(1,0,1,0)
+    LoadingPercent.Text = "100%"
+    LoadingStatus.Text = "TELEPORT SELESAI!"
+    task.wait(0.5)
+    
+    bp:Destroy()
+    bg:Destroy()
+    unlockAllWheels()
+    
+    for _, child in pairs(character:GetDescendants()) do
+        if child:IsA("BasePart") then
+            child.CustomPhysicalProperties = nil
+        end
+    end
+    
+    LoadingFrame.Visible = false
 end
 
 -- Buat semua button TP
@@ -346,11 +555,11 @@ for i, loc in ipairs(LOCATIONS) do
     
     tpButtons[i] = btn
     btn.MouseButton1Click:Connect(function()
-        teleportFlick(loc.pos)
+        smoothTeleport(CFrame.new(loc.pos), 10)
     end)
 end
 
--- ========== MS LOOP CONTENT ==========
+-- ========== MS LOOP CONTENT (SAMA PERSIS PATSTORE) ==========
 local MSLoopTitle = Instance.new("TextLabel")
 MSLoopTitle.Parent = MSLoopContent
 MSLoopTitle.Size = UDim2.new(1,-16,0,25)
@@ -513,7 +722,7 @@ local RefreshBtnCorner = Instance.new("UICorner")
 RefreshBtnCorner.Parent = RefreshBtn
 RefreshBtnCorner.CornerRadius = UDim.new(0,6)
 
--- ========== AUTO BUY UI (FIX SLIDER) ==========
+-- ========== AUTO BUY UI (SAMA PERSIS PATSTORE) ==========
 local AutoBuyTitle = Instance.new("TextLabel")
 AutoBuyTitle.Parent = AutoBuyContent
 AutoBuyTitle.Size = UDim2.new(1,-16,0,28)
@@ -805,7 +1014,7 @@ local AutoSellStopCorner = Instance.new("UICorner")
 AutoSellStopCorner.Parent = AutoSellStopBtn
 AutoSellStopCorner.CornerRadius = UDim.new(0,6)
 
--- ========== FUNCTIONS ==========
+-- ========== FUNCTIONS (SAMA PERSIS PATSTORE) ==========
 local function countTools(toolName)
     local count = 0
     if player.Character then
@@ -1065,7 +1274,7 @@ local function startMSLoop()
     end)
 end
 
--- ========== AUTO BUY FUNCTIONS (FIX SLIDER - PAKAI FIRESERVER) ==========
+-- ========== AUTO BUY FUNCTIONS (SAMA PERSIS PATSTORE - FIRESERVER) ==========
 local autoBuyRunning = false
 local currentBuyAmount = 10
 local autoBuyTotalBought = 0
@@ -1100,7 +1309,7 @@ local function startAutoBuy()
     }
     
     task.spawn(function()
-        local amount = currentBuyAmount  -- AMBIL NILAI SLIDER SEKARANG
+        local amount = currentBuyAmount
         
         for _, item in ipairs(BUY_ITEMS) do
             if not autoBuyRunning then break end
@@ -1385,7 +1594,7 @@ AutoSellTabBtn.MouseButton1Click:Connect(function()
     AutoSellInfo.Text = "Tools: " .. #getSellTools()
 end)
 
--- Slider untuk Auto Buy (FIX)
+-- Slider untuk Auto Buy
 JumlahSliderBg.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         local mousePos = input.Position.X
